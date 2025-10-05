@@ -208,3 +208,5 @@ En cas de problème, vérifier :
 3. La configuration DNS
 4. Le firewall
 5. Les permissions des fichiers
+
+

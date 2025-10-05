@@ -16,3 +16,5 @@ echo "🌐 Démarrage du serveur de production..."
 node server.js
 
 echo "✅ Déploiement terminé!"
+
+
