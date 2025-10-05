@@ -1,3 +1,7 @@
+production.env
+node_modules
+dist
+
 # Fichiers à ignorer lors du déploiement
 node_modules/
 npm-debug.log*
