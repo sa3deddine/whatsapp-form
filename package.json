@@ -5,29 +5,30 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "start": "node server.js",
+    "start": "npm run build && node server.js",
+    "dev": "vite --host",
     "build": "vite build",
-    "dev": "vite",
-    "server": "node server.js"
+    "preview": "vite preview",
+    "server": "node server.js",
+    "dev-server": "concurrently \"npm run dev\" \"npm run server\"",
+    "setup": "npm install && npm run build"
   },
   "dependencies": {
-    "autoprefixer": "^10.4.21",
     "cors": "^2.8.5",
     "express": "^4.18.2",
     "lucide-react": "^0.462.0",
-    "node-fetch": "^3.3.2",
-    "postcss": "^8.5.6",
-    "tailwindcss": "^4.1.14"
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.1.14",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.1",
+    "concurrently": "^9.2.1",
     "libphonenumber-js": "^1.11.13",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-phone-number-input": "^3.4.8",
+    "terser": "^5.44.0",
     "typescript": "^5.6.3",
     "vite": "^5.4.20"
   },
